@@ -76,7 +76,6 @@ class Response extends IlluminateResponse
         parent::__construct($content, $status, $headers);
 
         $this->binding = $binding;
-        $this->content = $content ?? '';
     }
 
     /**
@@ -128,12 +127,11 @@ class Response extends IlluminateResponse
     {
         $content = $this->getOriginalContent() ?? '';
 
-        $this->fireMorphingEvent();
+        //! $this->fireMorphingEvent();
 
         if (isset(static::$transformer) && static::$transformer->transformableResponse($content)) {
             $content = static::$transformer->transform($content);
         }
-
 
         $formatter = static::getFormatter($format);
 
@@ -147,7 +145,7 @@ class Response extends IlluminateResponse
             $this->headers->set('Content-Type', $formatter->getContentType());
         }
 
-        $this->fireMorphedEvent();
+        //! $this->fireMorphedEvent();
 
         if ($content instanceof EloquentModel) {
             $content = $formatter->formatEloquentModel($content);
@@ -189,11 +187,9 @@ class Response extends IlluminateResponse
      */
     protected function fireMorphingEvent()
     {
-
         if (!static::$events) {
             return;
         }
-
 
         static::$events->dispatch(new ResponseIsMorphing($this, $this->content));
     }
