@@ -76,6 +76,7 @@ class Response extends IlluminateResponse
         parent::__construct($content, $status, $headers);
 
         $this->binding = $binding;
+        $this->content = $content ?? '';
     }
 
     /**
@@ -106,7 +107,7 @@ class Response extends IlluminateResponse
         // If the contents of the JsonResponse does not starts with /**/ (typical laravel jsonp response)
         // we assume that it is a valid json response that can be decoded, or we just use the raw jsonp
         // contents for building the response
-        if (! Str::startsWith($json->getContent(), '/**/')) {
+        if (!Str::startsWith($json->getContent(), '/**/')) {
             $content = json_decode($json->getContent(), true);
         }
 
@@ -133,6 +134,7 @@ class Response extends IlluminateResponse
             $content = static::$transformer->transform($content);
         }
 
+
         $formatter = static::getFormatter($format);
 
         $formatter->setOptions(static::getFormatsOptions($format));
@@ -141,7 +143,7 @@ class Response extends IlluminateResponse
 
         // If we have no content, we don't want to set this header, as it will be blank
         $contentType = $formatter->getContentType();
-        if (! empty($contentType)) {
+        if (!empty($contentType)) {
             $this->headers->set('Content-Type', $formatter->getContentType());
         }
 
@@ -156,7 +158,7 @@ class Response extends IlluminateResponse
         } elseif ($content instanceof stdClass) {
             $content = $formatter->formatArray((array) $content);
         } else {
-            if (! empty($defaultContentType)) {
+            if (!empty($defaultContentType)) {
                 $this->headers->set('Content-Type', $defaultContentType);
             }
         }
@@ -173,7 +175,7 @@ class Response extends IlluminateResponse
      */
     protected function fireMorphedEvent()
     {
-        if (! static::$events) {
+        if (!static::$events) {
             return;
         }
 
@@ -187,9 +189,11 @@ class Response extends IlluminateResponse
      */
     protected function fireMorphingEvent()
     {
-        if (! static::$events) {
+
+        if (!static::$events) {
             return;
         }
+
 
         static::$events->dispatch(new ResponseIsMorphing($this, $this->content));
     }
@@ -203,7 +207,7 @@ class Response extends IlluminateResponse
         // then we most likely have an object that cannot be type cast. In that
         // case we'll simply leave the content as null and set the original
         // content value and continue.
-        if (! empty($content) && is_object($content) && ! $this->shouldBeJson($content)) {
+        if (!empty($content) && is_object($content) && !$this->shouldBeJson($content)) {
             $this->original = $content;
 
             return $this;
@@ -239,7 +243,7 @@ class Response extends IlluminateResponse
      */
     public static function getFormatter($format)
     {
-        if (! static::hasFormatter($format)) {
+        if (!static::hasFormatter($format)) {
             throw new NotAcceptableHttpException('Unable to format response according to Accept header.');
         }
 
@@ -287,7 +291,7 @@ class Response extends IlluminateResponse
      */
     public static function getFormatsOptions($format)
     {
-        if (! static::hasOptionsForFormat($format)) {
+        if (!static::hasOptionsForFormat($format)) {
             return [];
         }
 
